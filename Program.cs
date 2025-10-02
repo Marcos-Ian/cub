@@ -1,20 +1,23 @@
-﻿using OpenTK.Mathematics;
+﻿using Assignment_4;
 using OpenTK.Windowing.Desktop;
 
-namespace FirstOpenTK
+namespace Assignment_4
 {
-    internal static class Program
+    class Program
     {
         static void Main(string[] args)
         {
-            var native = new NativeWindowSettings
+            var gw = GameWindowSettings.Default;
+            var nw = new NativeWindowSettings()
             {
-                ClientSize = new Vector2i(900, 700),
-                Title = "OpenTK Cube (MVP + Depth + Controls)"
+                Title = "Assignment 4 - Texture Mapping",
+                Size = new OpenTK.Mathematics.Vector2i(800, 600)
             };
 
-            using var game = new Game(GameWindowSettings.Default, native);
-            game.Run();
+            using (var game = new Game(gw, nw))
+            {
+                game.Run();
+            }
         }
     }
 }
