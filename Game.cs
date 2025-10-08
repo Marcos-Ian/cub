@@ -1,9 +1,8 @@
-﻿using Assignment_4;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using StbImageSharp;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.IO;
 
@@ -13,17 +12,25 @@ namespace Assignment_4
     {
         // GL objects
         private int _vaoHandle, _vboHandle, _eboHandle;
-        private int _textureHandle;
         private Shader _shaderProgram;
         private readonly Cube _cube = new Cube();
 
-        // Uniforms
-        private int _mvpUniform;
-
         // State
         private float _spinRadians;
+        private Vector3 _lightPos = new Vector3(2.0f, 2.0f, 2.0f);
+        private Vector3 _cameraPos = new Vector3(2f, 2f, 3f);
 
-        public Game(GameWindowSettings gw, NativeWindowSettings nw) : base(gw, nw) { }
+        // Camera control
+        private bool _firstMove = true;
+        private Vector2 _lastMousePos;
+        private float _cameraYaw = -90f;
+        private float _cameraPitch = 0f;
+        private Vector3 _cameraFront = -Vector3.UnitZ;
+
+        public Game(GameWindowSettings gw, NativeWindowSettings nw) : base(gw, nw)
+        {
+            CursorState = CursorState.Grabbed; // Capture mouse for camera control
+        }
 
         protected override void OnLoad()
         {
@@ -36,30 +43,82 @@ namespace Assignment_4
             // GPU buffers & vertex layout
             CreateGeometryBuffers();
 
-            // Build absolute paths from executable directory (bin/Debug/net8.0)
+            // Build shader paths
             string basePath = AppContext.BaseDirectory;
-
-            // Shaders
-            string vertexPath = Path.Combine(basePath, "Shaders", "shader.vert");
-            string fragmentPath = Path.Combine(basePath, "Shaders", "shader.frag");
+            string vertexPath = Path.Combine(basePath, "Shaders", "phong.vert");
+            string fragmentPath = Path.Combine(basePath, "Shaders", "phong.frag");
             _shaderProgram = new Shader(vertexPath, fragmentPath);
-            _shaderProgram.Use();
-
-            // Texture
-            string texPath = Path.Combine(basePath, "Textures", "checkerboard.jpg");
-            _textureHandle = LoadTextureFromFile(texPath);
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, _textureHandle);
-            _shaderProgram.SetInt("tex0", 0);
-
-            // Cache uniform location
-            _mvpUniform = GL.GetUniformLocation(_shaderProgram.Handle, "mvp");
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
-            _spinRadians += (float)args.Time; // same rotation behavior
+
+            // Rotate cube
+            _spinRadians += (float)args.Time;
+
+            var input = KeyboardState;
+            float cameraSpeed = 2.5f * (float)args.Time;
+
+            // Camera movement (WASD)
+            if (input.IsKeyDown(Keys.W))
+                _cameraPos += cameraSpeed * _cameraFront;
+            if (input.IsKeyDown(Keys.S))
+                _cameraPos -= cameraSpeed * _cameraFront;
+            if (input.IsKeyDown(Keys.A))
+                _cameraPos -= Vector3.Normalize(Vector3.Cross(_cameraFront, Vector3.UnitY)) * cameraSpeed;
+            if (input.IsKeyDown(Keys.D))
+                _cameraPos += Vector3.Normalize(Vector3.Cross(_cameraFront, Vector3.UnitY)) * cameraSpeed;
+
+            // Light movement (Arrow keys)
+            if (input.IsKeyDown(Keys.Up))
+                _lightPos.Y += cameraSpeed;
+            if (input.IsKeyDown(Keys.Down))
+                _lightPos.Y -= cameraSpeed;
+            if (input.IsKeyDown(Keys.Left))
+                _lightPos.X -= cameraSpeed;
+            if (input.IsKeyDown(Keys.Right))
+                _lightPos.X += cameraSpeed;
+
+            // Exit on Escape
+            if (input.IsKeyDown(Keys.Escape))
+                Close();
+        }
+
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            if (_firstMove)
+            {
+                _lastMousePos = new Vector2(e.X, e.Y);
+                _firstMove = false;
+                return;
+            }
+
+            float deltaX = e.X - _lastMousePos.X;
+            float deltaY = _lastMousePos.Y - e.Y; // Reversed: y-coordinates go from bottom to top
+            _lastMousePos = new Vector2(e.X, e.Y);
+
+            float sensitivity = 0.1f;
+            deltaX *= sensitivity;
+            deltaY *= sensitivity;
+
+            _cameraYaw += deltaX;
+            _cameraPitch += deltaY;
+
+            // Constrain pitch
+            if (_cameraPitch > 89.0f)
+                _cameraPitch = 89.0f;
+            if (_cameraPitch < -89.0f)
+                _cameraPitch = -89.0f;
+
+            // Update camera front vector
+            Vector3 front;
+            front.X = MathF.Cos(MathHelper.DegreesToRadians(_cameraYaw)) * MathF.Cos(MathHelper.DegreesToRadians(_cameraPitch));
+            front.Y = MathF.Sin(MathHelper.DegreesToRadians(_cameraPitch));
+            front.Z = MathF.Sin(MathHelper.DegreesToRadians(_cameraYaw)) * MathF.Cos(MathHelper.DegreesToRadians(_cameraPitch));
+            _cameraFront = Vector3.Normalize(front);
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -71,25 +130,31 @@ namespace Assignment_4
             _shaderProgram.Use();
             GL.BindVertexArray(_vaoHandle);
 
-            // Matrices: unchanged math/order
+            // Matrices
             Matrix4 model = Matrix4.CreateRotationY(_spinRadians);
-            Matrix4 view = Matrix4.LookAt(new Vector3(2f, 2f, 3f), Vector3.Zero, Vector3.UnitY);
-            Matrix4 proj = Matrix4.CreatePerspectiveFieldOfView(
+            Matrix4 view = Matrix4.LookAt(_cameraPos, _cameraPos + _cameraFront, Vector3.UnitY);
+            Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(
                 MathHelper.DegreesToRadians(45f),
                 Size.X / (float)Size.Y,
                 0.1f,
                 100f
             );
 
-            Matrix4 mvp = model * view * proj; // same multiplication order
-            GL.UniformMatrix4(_mvpUniform, false, ref mvp);
+            // Pass matrices to shader
+            _shaderProgram.SetMatrix4("model", model);
+            _shaderProgram.SetMatrix4("view", view);
+            _shaderProgram.SetMatrix4("projection", projection);
+
+            // Pass lighting parameters
+            _shaderProgram.SetVector3("lightPos", _lightPos);
+            _shaderProgram.SetVector3("viewPos", _cameraPos);
+            _shaderProgram.SetVector3("lightColor", new Vector3(1.0f, 1.0f, 1.0f));
+            _shaderProgram.SetVector3("objectColor", new Vector3(0.8f, 0.3f, 0.3f));
 
             GL.DrawElements(PrimitiveType.Triangles, _cube.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
             SwapBuffers();
         }
-
-        // --- helpers (structure-only refactor; behavior unchanged) ----------------
 
         private void CreateGeometryBuffers()
         {
@@ -113,43 +178,24 @@ namespace Assignment_4
                           _cube.Indices,
                           BufferUsageHint.StaticDraw);
 
-            // Layout: vec3 position + vec2 uv (identical to original)
-            const int stride = 5 * sizeof(float);
+            // Layout: vec3 position (location 0) + vec3 normal (location 1)
+            const int stride = 6 * sizeof(float);
+
+            // Position attribute
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, 0);
             GL.EnableVertexAttribArray(0);
 
-            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
+            // Normal attribute
+            GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, stride, 3 * sizeof(float));
             GL.EnableVertexAttribArray(1);
         }
 
-        private int LoadTextureFromFile(string path)
+        protected override void OnUnload()
         {
-            int tex = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, tex);
-
-            using (var stream = File.OpenRead(path))
-            {
-                var img = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-                GL.TexImage2D(TextureTarget.Texture2D,
-                              0,
-                              PixelInternalFormat.Rgba,
-                              img.Width,
-                              img.Height,
-                              0,
-                              PixelFormat.Rgba,
-                              PixelType.UnsignedByte,
-                              img.Data);
-            }
-
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
-            // Same sampler parameters
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-            return tex;
+            base.OnUnload();
+            GL.DeleteBuffer(_vboHandle);
+            GL.DeleteBuffer(_eboHandle);
+            GL.DeleteVertexArray(_vaoHandle);
         }
     }
 }

@@ -2,43 +2,44 @@
 {
     public class Cube
     {
+        // Each vertex now has: position (x,y,z) + normal (nx,ny,nz)
         public float[] Vertices =
         {
-            // Front face
-            -0.5f, -0.5f,  0.5f, 0f, 0f,
-             0.5f, -0.5f,  0.5f, 1f, 0f,
-             0.5f,  0.5f,  0.5f, 1f, 1f,
-            -0.5f,  0.5f,  0.5f, 0f, 1f,
+            // Front face (normal: 0, 0, 1)
+            -0.5f, -0.5f,  0.5f,  0f, 0f, 1f,
+             0.5f, -0.5f,  0.5f,  0f, 0f, 1f,
+             0.5f,  0.5f,  0.5f,  0f, 0f, 1f,
+            -0.5f,  0.5f,  0.5f,  0f, 0f, 1f,
 
-            // Back face
-             0.5f, -0.5f, -0.5f, 0f, 0f,
-            -0.5f, -0.5f, -0.5f, 1f, 0f,
-            -0.5f,  0.5f, -0.5f, 1f, 1f,
-             0.5f,  0.5f, -0.5f, 0f, 1f,
+            // Back face (normal: 0, 0, -1)
+             0.5f, -0.5f, -0.5f,  0f, 0f, -1f,
+            -0.5f, -0.5f, -0.5f,  0f, 0f, -1f,
+            -0.5f,  0.5f, -0.5f,  0f, 0f, -1f,
+             0.5f,  0.5f, -0.5f,  0f, 0f, -1f,
 
-            // Left face
-            -0.5f, -0.5f, -0.5f, 0f, 0f,
-            -0.5f, -0.5f,  0.5f, 1f, 0f,
-            -0.5f,  0.5f,  0.5f, 1f, 1f,
-            -0.5f,  0.5f, -0.5f, 0f, 1f,
+            // Left face (normal: -1, 0, 0)
+            -0.5f, -0.5f, -0.5f, -1f, 0f, 0f,
+            -0.5f, -0.5f,  0.5f, -1f, 0f, 0f,
+            -0.5f,  0.5f,  0.5f, -1f, 0f, 0f,
+            -0.5f,  0.5f, -0.5f, -1f, 0f, 0f,
 
-            // Right face
-             0.5f, -0.5f,  0.5f, 0f, 0f,
-             0.5f, -0.5f, -0.5f, 1f, 0f,
-             0.5f,  0.5f, -0.5f, 1f, 1f,
-             0.5f,  0.5f,  0.5f, 0f, 1f,
+            // Right face (normal: 1, 0, 0)
+             0.5f, -0.5f,  0.5f,  1f, 0f, 0f,
+             0.5f, -0.5f, -0.5f,  1f, 0f, 0f,
+             0.5f,  0.5f, -0.5f,  1f, 0f, 0f,
+             0.5f,  0.5f,  0.5f,  1f, 0f, 0f,
 
-            // Top face
-            -0.5f,  0.5f,  0.5f, 0f, 0f,
-             0.5f,  0.5f,  0.5f, 1f, 0f,
-             0.5f,  0.5f, -0.5f, 1f, 1f,
-            -0.5f,  0.5f, -0.5f, 0f, 1f,
+            // Top face (normal: 0, 1, 0)
+            -0.5f,  0.5f,  0.5f,  0f, 1f, 0f,
+             0.5f,  0.5f,  0.5f,  0f, 1f, 0f,
+             0.5f,  0.5f, -0.5f,  0f, 1f, 0f,
+            -0.5f,  0.5f, -0.5f,  0f, 1f, 0f,
 
-            // Bottom face
-            -0.5f, -0.5f, -0.5f, 0f, 0f,
-             0.5f, -0.5f, -0.5f, 1f, 0f,
-             0.5f, -0.5f,  0.5f, 1f, 1f,
-            -0.5f, -0.5f,  0.5f, 0f, 1f,
+            // Bottom face (normal: 0, -1, 0)
+            -0.5f, -0.5f, -0.5f,  0f, -1f, 0f,
+             0.5f, -0.5f, -0.5f,  0f, -1f, 0f,
+             0.5f, -0.5f,  0.5f,  0f, -1f, 0f,
+            -0.5f, -0.5f,  0.5f,  0f, -1f, 0f,
         };
 
         public uint[] Indices =
