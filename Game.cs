@@ -19,6 +19,7 @@ namespace Assignment_4
         private float _spinRadians;
         private Vector3 _lightPos = new Vector3(2.0f, 2.0f, 2.0f);
         private Vector3 _cameraPos = new Vector3(2f, 2f, 3f);
+        private float _fov = 45f; // Field of view for zoom
 
         // Camera control
         private bool _firstMove = true;
@@ -121,6 +122,20 @@ namespace Assignment_4
             _cameraFront = Vector3.Normalize(front);
         }
 
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            // Adjust FOV based on scroll direction
+            _fov -= e.OffsetY * 2f;
+
+            // Clamp FOV between 30° and 90°
+            if (_fov < 30f)
+                _fov = 30f;
+            if (_fov > 90f)
+                _fov = 90f;
+        }
+
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
@@ -134,7 +149,7 @@ namespace Assignment_4
             Matrix4 model = Matrix4.CreateRotationY(_spinRadians);
             Matrix4 view = Matrix4.LookAt(_cameraPos, _cameraPos + _cameraFront, Vector3.UnitY);
             Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(
-                MathHelper.DegreesToRadians(45f),
+                MathHelper.DegreesToRadians(_fov), // Use dynamic FOV
                 Size.X / (float)Size.Y,
                 0.1f,
                 100f
