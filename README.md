@@ -64,27 +64,47 @@ The player explores a science lab, finds a **keycard**, interacts with a **card 
   - `StbImageSharp` 
 
 🧩 External Credits
-Asset	Source from SketchFab / Author	License / Notes
-Microscope - Download Free 3D model by Eugen Vahrushin (@eugen_vahrushin) [9562226]
-Desk Low-Poly - Download Free 3D model by Pedro Belthori (@pedrobelthori) [ed62a64]
-Chemistry Lab Table - Download Free 3D model by Jawahar Yokesh (@Jawahar_Yokesh) [fc5951d]
-ApertureVR:TWP - Lab Chair - Download Free 3D model by nyctomatic (@nyctomatic) [90549fd]
-Bar Stool - Download Free 3D model by Saandy (@Saandy) [aaf556f]
-Water Bath - Download Free 3D model by VeeRuby Technologies Pvt Ltd (@veerubyinc) [7567889]
-Digital timer programmer - Download Free 3D model by Sabowsla (@sabowsla) [e6814a0]
-Safety Goggles - Download Free 3D model by C (@C44t) [57fdbe1]
-Fire Extinguisher - Download Free 3D model by Loïc (@loichuet1) [5676b17]
-Modern Fridge - Download Free 3D model by dylanheyes (@dylanheyes) [366f7df]
-LowPoly - Flask - Download Free 3D model by BerserkerBroon (@BerserkerBroon) [dcf232c]
-Magic flask - Download Free 3D model by OlegPopka (@OlegPopka) [60e1635]
-Conical Flask - Download Free 3D model by VeeRuby Technologies Pvt Ltd (@veerubyinc) [21f6d8e]
-Ceiling Light - Download Free 3D model by Heliona (@Heliona) [3e65ceb]
-PCR machine - Download Free 3D model by orphic_oasis8 (@orphic_oasis8) [a76bd38]
-Test Tube (Mutations) - Download Free 3D model by Michael V (@bossdeff) [96785b6]
-Keycard Model - Download Free 3D model by SemB (@SemBoekenoogen) [528fff6]
-Card Security Reader - Download Free 3D model by Anom Purple Modelling (@Anom404) [9ff3c81]
-door door metal - Download Free 3D model by Mehdi Shahsavan (@ahmagh2e) [b21ec27]
-Lab Counter W/ Sink (UV Wrapped, No textures) - Download Free 3D model by Kimbell Whatley (@KimbellWhatley) [19159db]
+Sketchfab models (titles · author · ID):
+
+Microscope — Eugen Vahrushin — 9562226
+
+Desk Low-Poly — Pedro Belthori — ed62a64
+
+Chemistry Lab Table — Jawahar Yokesh — fc5951d
+
+ApertureVR:TWP – Lab Chair — nyctomatic — 90549fd
+
+Bar Stool — Saandy — aaf556f
+
+Water Bath — VeeRuby Technologies Pvt Ltd — 7567889
+
+Digital timer programmer — Sabowsla — e6814a0
+
+Safety Goggles — C — 57fdbe1
+
+Fire Extinguisher — Loïc — 5676b17
+
+Modern Fridge — dylanheyes — 366f7df
+
+LowPoly – Flask — BerserkerBroon — dcf232c
+
+Magic flask — OlegPopka — 60e1635
+
+Conical Flask — VeeRuby Technologies Pvt Ltd — 21f6d8e
+
+Ceiling Light — Heliona — 3e65ceb
+
+PCR machine — orphic_oasis8 — a76bd38
+
+Test Tube (Mutations) — Michael V — 96785b6
+
+Keycard Model — SemB — 528fff6
+
+Card Security Reader — Anom Purple Modelling — 9ff3c81
+
+Door (metal) — Mehdi Shahsavan — b21ec27
+
+Assets are used under their respective Sketchfab licenses for educational/demo purposes.
 
 <img width="1272" height="752" alt="image" src="https://github.com/user-attachments/assets/36757315-330d-41da-b665-8bbdec1d0f8e" />
 <img width="1276" height="748" alt="image" src="https://github.com/user-attachments/assets/24d7c7f2-fe43-4689-83ee-2b6a8152e301" />
