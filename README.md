@@ -109,7 +109,3 @@ Assets are used under their respective Sketchfab licenses for educational/demo p
 <img width="1272" height="752" alt="image" src="https://github.com/user-attachments/assets/36757315-330d-41da-b665-8bbdec1d0f8e" />
 <img width="1276" height="748" alt="image" src="https://github.com/user-attachments/assets/24d7c7f2-fe43-4689-83ee-2b6a8152e301" />
 <img width="1272" height="756" alt="image" src="https://github.com/user-attachments/assets/2074405b-0d71-49bc-9094-b5ab574646a5" />
-
-
-
-All assets are used strictly for academic demonstration under fair educational use.
