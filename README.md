@@ -48,38 +48,33 @@ The player explores a science lab, finds a **keycard**, interacts with a **card 
 ## 🧱 Project Structure
 
 /cub
-│
-├── Game.cs # Main game logic
-├── Program.cs # Entry point
-│
-├── Managers/
-│ ├── ModelManager.cs # Loads and manages 3D models
-│ ├── CollisionManager.cs# Handles collision detection
-│
-├── Entities/
-│ ├── StaticInstance.cs # Renderable scene objects
-│ ├── SecurityDoor.cs # Door logic and animation
-│ ├── ExitTrigger.cs # Scene exit logic
-│ ├── IInteractable.cs # Interaction interface
-│
-├── Rendering/
-│ ├── Shader.cs # GLSL shader management
-│ ├── Mesh.cs # Geometry abstraction
-│ ├── Texture.cs # Texture loading and binding
-│ ├── Camera.cs # First-person camera logic
-│
-├── Geometry/
-│ ├── Aabb.cs # Axis-aligned bounding boxes
-│
-├── Assets/
-│ ├── floor.jpg
-│ ├── wall.jpg
-│ ├── door.jpg
-│ 
-│
-└── Shaders/
-├── vertex.glsl
-└── fragment.glsl
+├─ Game.cs
+├─ Program.cs
+├─ Managers/
+│  ├─ ModelManager.cs
+│  └─ CollisionManager.cs
+├─ Entities/
+│  ├─ StaticInstance.cs
+│  ├─ SecurityDoor.cs
+│  ├─ ExitTrigger.cs
+│  └─ IInteractable.cs
+├─ Rendering/
+│  ├─ Shader.cs
+│  ├─ Mesh.cs
+│  ├─ Texture.cs
+│  └─ Camera.cs
+├─ Geometry/
+│  ├─ Aabb.cs
+│  └─ Obb2D.cs
+├─ Assets/
+│  ├─ floor.jpg
+│  ├─ wall.jpg
+│  ├─ door.jpg
+│  └─ keycard.jpg
+└─ Shaders/
+   ├─ vertex.glsl
+   └─ fragment.glsl
+
 
 
 ---
