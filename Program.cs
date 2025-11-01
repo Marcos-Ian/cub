@@ -1,5 +1,7 @@
 ﻿using Assignment_4;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 
 namespace Assignment_4
 {
@@ -8,16 +10,17 @@ namespace Assignment_4
         static void Main(string[] args)
         {
             var gw = GameWindowSettings.Default;
+            gw.UpdateFrequency = 60; // Only this is needed now
+
             var nw = new NativeWindowSettings()
             {
-                Title = "Assignment 4 - Texture Mapping",
-                Size = new OpenTK.Mathematics.Vector2i(800, 600)
+                Title = "Mini 3D Explorer (Midterm)",
+                Size = new Vector2i(1280, 720),
+                Flags = ContextFlags.ForwardCompatible
             };
 
-            using (var game = new Game(gw, nw))
-            {
-                game.Run();
-            }
+            using var game = new Game(gw, nw);
+            game.Run();
         }
     }
 }

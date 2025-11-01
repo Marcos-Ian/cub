@@ -3,7 +3,8 @@ using OpenTK.Mathematics;
 using System;
 using System.IO;
 
-namespace Assignment_4
+
+namespace Assignment_4.Rendering
 {
     public class Shader
     {
