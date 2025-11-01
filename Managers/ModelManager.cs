@@ -37,13 +37,10 @@ namespace Assignment_4.Managers
         private Model _fridgeModel;
         private Model _pcrMachineModel;
         private Model _ceilingLightModel;
-
         private Model _keycardModel;
-
         private Model _flaskModel1;
         private Model _flaskModel2;
         private Model _flaskModel3;
-
         private Model _cardReaderModel;
         private Model _doorModel;
 
