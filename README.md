@@ -29,6 +29,7 @@ The player explores a science lab, finds a **keycard**, interacts with a **card 
 
 ## ✨ Features Implemented
 
+- **Phong lighting model** for realistic highlights and shading  
 - **First-person 3D camera** with mouse look and optional free-fly mode  
 - **Physics-style collisions** with static lab geometry (walls, desks, props)
 - **Interactive objects**:
