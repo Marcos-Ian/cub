@@ -1,24 +1,112 @@
-OpenTK Rotating Cube
+# 🧪 Mini 3D Explorer
 
-Library Used
-In this project, OpenTK (Open Toolkit) a C# overlay of OpenGL graphics rendering is used.
+A small **first-person 3D lab exploration game** built with **C# and OpenTK** and OpenGL.  
+The player explores a science lab, finds a **keycard**, interacts with a **card reader** to open a **security door**, and can pick up **colorful potion flasks** that temporarily alter gameplay effects.
 
-How the Cube Was Rendered
-The cube is constructed out of 8 vertices with each having a position and a RGB color.
-The EBO defines 12 triangles (36 indices) that comprise the 6 faces of the cube.
-The program sets up:
-  - Vertex state in a Vertex Array Object (VAO).
-  - Vertex data on a Vertex Buffer Object (VBO)
-- A Vertex Index Buffer Object (VIBO) holding indications of vertex connectivity.
-  - An Element Buffer Object (EBO) of indices.
-Two GLSL shaders are used:
-  - Vertex shader: rotates/scales/positions the cube by applying the Model-View-Projection (MVP) transformation.
-  - Fragment shader: colors the cube depending on vertex colors.
-A view matrix and a perspective camera projection are used to ensure that the cube is viewed in 3 dimensional space.
-On each frame:
-  - The cube automatically spins about the Y-axis.
-  - The rotation and scaling can be carried out manually using arrow keys.
-  - GL.DrawElements is used to draw the cube with depth testing on.
+---
 
-Start up the program and it will give you a spinning cube in 3D space that is colored in.
-<img width="474" height="371" alt="Screenshot 2025-09-24 112754" src="https://github.com/user-attachments/assets/4091b069-274a-4570-96cd-fed86d7c4998" />
+## 🎮 Gameplay Instructions
+
+### Movement
+| Action | Key |
+|---------|-----|
+| Move Forward / Backward | **W / S** |
+| Strafe Left / Right | **A / D** |
+| Look Around | **Mouse Movement** |
+| Toggle 3D flight mode | **F** |
+| Toggle Collision Detection | **C** |
+| Toggle Collision Debug Boxes | **B** |
+| Toggle Cursor Lock | **Esc** |
+| Reset Scene | **R** |
+| Interact (Pick up / Use)** | **E** |
+
+**Interactions:**
+- Pick up the **keycard** to unlock the lab door.
+- Use the **card reader** beside the door to gain access.
+- Pick up **flask potions** to trigger short visual effects (color inversion, camera flip, inverted controls).
+
+---
+
+## ✨ Features Implemented
+
+- **Phong lighting model** for realistic highlights and shading  
+- **First-person 3D camera** with mouse look and optional free-fly mode  
+- **Physics-style collisions** with static lab geometry (walls, desks, props)
+- **Interactive objects**:
+  - Keycard and card reader system (unlocks door)
+  - Door with smooth animation
+  - Three potion types with visual effects:
+    - Inverted colors
+    - Inverted controls
+    - Flipped camera
+- **Lighting and Phong shading**
+- **Transparent rendering** for glass and liquids
+- **Debug collision boxes** toggle
+- **Scene reset system**
+
+---
+
+## 🧱 Project Structure
+
+<img width="377" height="737" alt="image" src="https://github.com/user-attachments/assets/8ac848a5-aabe-4214-84f2-87cdf021f3e0" />
+
+
+
+---
+
+## 🛠 How to Build and Run
+
+### Requirements
+- **.NET 8.0 SDK** (or compatible version)
+- **OpenTK 4.x**
+- **NuGet packages:**
+  - `OpenTK`  
+  - `System.Drawing.Common` (for texture loading)
+  - `StbImageSharp` 
+
+🧩 External Credits
+Sketchfab models (titles · author · ID):
+
+Microscope — Eugen Vahrushin — 9562226
+
+Desk Low-Poly — Pedro Belthori — ed62a64
+
+Chemistry Lab Table — Jawahar Yokesh — fc5951d
+
+ApertureVR:TWP – Lab Chair — nyctomatic — 90549fd
+
+Bar Stool — Saandy — aaf556f
+
+Water Bath — VeeRuby Technologies Pvt Ltd — 7567889
+
+Digital timer programmer — Sabowsla — e6814a0
+
+Safety Goggles — C — 57fdbe1
+
+Fire Extinguisher — Loïc — 5676b17
+
+Modern Fridge — dylanheyes — 366f7df
+
+LowPoly – Flask — BerserkerBroon — dcf232c
+
+Magic flask — OlegPopka — 60e1635
+
+Conical Flask — VeeRuby Technologies Pvt Ltd — 21f6d8e
+
+Ceiling Light — Heliona — 3e65ceb
+
+PCR machine — orphic_oasis8 — a76bd38
+
+Test Tube (Mutations) — Michael V — 96785b6
+
+Keycard Model — SemB — 528fff6
+
+Card Security Reader — Anom Purple Modelling — 9ff3c81
+
+Door (metal) — Mehdi Shahsavan — b21ec27
+
+Assets are used under their respective Sketchfab licenses for educational/demo purposes.
+
+<img width="1272" height="752" alt="image" src="https://github.com/user-attachments/assets/36757315-330d-41da-b665-8bbdec1d0f8e" />
+<img width="1276" height="748" alt="image" src="https://github.com/user-attachments/assets/24d7c7f2-fe43-4689-83ee-2b6a8152e301" />
+<img width="1272" height="756" alt="image" src="https://github.com/user-attachments/assets/2074405b-0d71-49bc-9094-b5ab574646a5" />

@@ -1,19 +1,25 @@
-﻿using OpenTK.Mathematics;
+﻿using Assignment_4;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 
-namespace FirstOpenTK
+namespace Assignment_4
 {
-    internal static class Program
+    class Program
     {
         static void Main(string[] args)
         {
-            var native = new NativeWindowSettings
+            var gw = GameWindowSettings.Default;
+            gw.UpdateFrequency = 60; // Only this is needed now
+
+            var nw = new NativeWindowSettings()
             {
-                ClientSize = new Vector2i(900, 700),
-                Title = "OpenTK Cube (MVP + Depth + Controls)"
+                Title = "Mini 3D Explorer (Midterm)",
+                Size = new Vector2i(1280, 720),
+                Flags = ContextFlags.ForwardCompatible
             };
 
-            using var game = new Game(GameWindowSettings.Default, native);
+            using var game = new Game(gw, nw);
             game.Run();
         }
     }
