@@ -5,12 +5,9 @@ using Assignment_4.Rendering;
 using Assignment_4.Geometry;
 namespace Assignment_4.Entities
 {
-    public class SecurityDoor : IInteractable
+    public class SecurityDoor
     {
-        public string Prompt => _open ? "Door OPEN" :
-                                _locked ? "Requires KEYCARD" : "Press E to OPEN DOOR";
         public Vector3 Position;
-        public bool _locked = true;
         public bool _open = false;
 
         public Mesh Mesh;
@@ -39,37 +36,6 @@ namespace Assignment_4.Entities
             Texture = tex;
             Position = pos;
             WorldAabb = ClosedAabbLocal.Transform(ModelClosed);
-        }
-
-        public bool CanInteract(Game game)
-        {
-            return (game.PlayerDistance(Position) < 1.6f) && (!_locked || game.HasKeycard);
-        }
-
-        public bool Interact(Game game)
-        {
-            if (!CanInteract(game)) return false;
-
-            if (_locked && game.HasKeycard)
-                _locked = false;
-
-            if (!_open)
-            {
-                _open = true;
-                game.SetHint("Door opened.");
-            }
-            else
-            {
-                _open = false;
-                game.SetHint("Door closed.");
-            }
-
-            // Update blocking AABB
-            WorldAabb = _open
-                ? new Aabb(new Vector3(0), new Vector3(0))
-                : ClosedAabbLocal.Transform(ModelClosed);
-
-            return true;
         }
 
         public void Draw(Shader shader)
