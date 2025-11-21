@@ -17,15 +17,12 @@ namespace Assignment_4
     public class Game : GameWindow
     {
         // ──────────────── STATE ────────────────
-        public bool HasKeycard { get; set; }
-        public bool CardReaderUsed { get; set; }  // used to gate door once reader is used
-        private string _hint = "Objective: Restore power.";
+        private string _hint = "Explore the lab and bump into things. (Press B to toggle collision debug)";
 
         // ──────────────── OBJECTS ────────────────
         private List<StaticInstance> _props = new();
         private StaticInstance[] _labWalls;
         private SecurityDoor _door;
-        private ExitTrigger _exit;
 
         // ──────────────── MANAGERS ────────────────
         private readonly CollisionManager _collision = new(); // your existing collision helper
@@ -34,7 +31,7 @@ namespace Assignment_4
         // ──────────────── SCENE RESOURCES ────────────────
         private Shader _shader;
         private Texture _texFloor;
-        private Texture _texWall, _texPanel, _texDoor, _texCard;
+        private Texture _texWall, _texPanel, _texDoor;
         private Mesh _meshFloor, _meshCube;
         private readonly Cube _cubeData = new Cube();
         private string _assetsPath;
@@ -51,51 +48,14 @@ namespace Assignment_4
         // ──────────────── INPUT / TOGGLES ────────────────
         private bool _free3DMode = false;
         private bool _collisionEnabled = true;
-        private bool _eWasDownLab = false;
         private bool _fWasDown = false;
         private bool _cWasDown = false;
         private bool _rWasDown = false;
         private bool _bWasDown = false;
         private bool _showCollisionBoxes = false; // use this everywhere (replaces missing _debugCollisionBoxesEnabled)
-
-        // ──────────────── KEYCARD / DOOR ────────────────
-        private bool _keycardAvailable = true;
-        private readonly Vector3 _keycardSpawn = new(2.4f, 0.89f, -1.4f);
-        private const float _keycardPickupRadius = 1f;
-
-        private const float _readerUseRadius = 0.8f;
-
         private readonly Vector3 _doorClosedPos = new(5f, 0f, -1f);
-        private readonly Vector3 _doorHingeOffset = new(0f, 0f, -0.5f);
         private float _doorAnim = 0f;
         private const float _doorAnimSpeed = 3.0f;
-
-        // ───────────── POTION EFFECTS ─────────────
-        private bool _flask1Available = true;
-        private bool _flask2Available = true;
-        private bool _flask3Available = true;
-
-        private readonly Vector3 _flask1SpawnPos = new(-1.4f, 0.83f, -0.3f);
-        private readonly Vector3 _flask2SpawnPos = new(0.0f, 0.87f, -1.5f);
-        private readonly Vector3 _flask3SpawnPos = new(1.3f, 0.87f, -1.4f);
-
-        private readonly Vector3 _flask1SpawnRot = new(0f, 60f, 0f);
-        private readonly Vector3 _flask2SpawnRot = new(-90f, 150f, 0f);
-        private readonly Vector3 _flask3SpawnRot = new(0f, -40f, 0f);
-
-        private readonly Vector3 _flask1SpawnScale = new(0.10f, 0.10f, 0.10f);
-        private readonly Vector3 _flask2SpawnScale = new(0.05f, 0.05f, 0.05f);
-        private readonly Vector3 _flask3SpawnScale = new(0.03f, 0.03f, 0.03f);
-
-        private float _invertColorsT = 0f;
-        private float _invertControlsT = 0f;
-        private float _cameraFlipT = 0f;
-
-        private const float PotionDuration = 10f; // seconds
-
-        private void ApplyInvertColors() { _invertColorsT = PotionDuration; SetHint("Potion! Colors inverted for 10s."); }
-        private void ApplyInvertControls() { _invertControlsT = PotionDuration; SetHint("Potion! Controls inverted for 10s."); }
-        private void ApplyCameraFlip() { _cameraFlipT = PotionDuration; SetHint("Potion! Camera flipped for 10s."); }
 
         // ──────────────── HELPERS ────────────────
         public void SetHint(string s) { _hint = s; Title = $"Mini 3D Explorer — {s}"; }
@@ -145,13 +105,13 @@ namespace Assignment_4
 
             // === Models via ModelManager ===
             _models = new ModelManager(_assetsPath);
-            _models.LoadModels(_keycardSpawn, _doorClosedPos);
+            var keycardSpawn = new Vector3(2.4f, 0.89f, -1.4f);
+            _models.LoadModels(keycardSpawn, _doorClosedPos);
             Console.WriteLine("=== Model Loading Complete ===");
             Console.WriteLine($"\n=== Total models loaded: {_models.GetLoadedModelsCount()} ===");
 
             BuildLab();
             BuildScene();
-            _flask1Available = _flask2Available = _flask3Available = true;
 
             // Set up multi-OBB collisions using manager's references
             _collision.SetupModelCollisions(
@@ -163,7 +123,7 @@ namespace Assignment_4
                 stoolModel: _models.StoolModel
             );
 
-            SetHint("Objective: Find the keycard. (Press B to toggle collision debug)");
+            SetHint("Collisions only: explore the lab and avoid clipping through props.");
         }
 
         // ──────────────── UPDATE LOOP ────────────────
@@ -174,11 +134,6 @@ namespace Assignment_4
             var ms = MouseState;
 
             if (!IsFocused) return;
-
-            // Tick down active potion timers
-            if (_invertColorsT > 0f) _invertColorsT = MathF.Max(0f, _invertColorsT - (float)args.Time);
-            if (_invertControlsT > 0f) _invertControlsT = MathF.Max(0f, _invertControlsT - (float)args.Time);
-            if (_cameraFlipT > 0f) _cameraFlipT = MathF.Max(0f, _cameraFlipT - (float)args.Time);
 
             // ── Reset simulation (R)
             if (kb.IsKeyDown(Keys.R) && !_rWasDown)
@@ -214,9 +169,7 @@ namespace Assignment_4
             _fWasDown = kb.IsKeyDown(Keys.F);
 
             // ── Movement
-            float baseSpeed = 5f * (float)args.Time;
-            float sign = (_invertControlsT > 0f) ? -1f : 1f;
-            float speed = baseSpeed * sign;
+            float speed = 5f * (float)args.Time;
 
             Vector3 front = _camera.GetFront();
             Vector3 right = _camera.Right;
@@ -311,73 +264,6 @@ namespace Assignment_4
                 _camera.Position = new Vector3(camXZ.X, _camera.Position.Y, camXZ.Y);
             }
 
-            // ── Interactions (E)
-            if (kb.IsKeyPressed(Keys.E))
-            {
-                // Keycard pickup
-                if (_keycardAvailable && _models.KeycardModel != null &&
-                    PlayerDistance(_models.KeycardModel.Position) <= _keycardPickupRadius)
-                {
-                    HasKeycard = true;
-                    _keycardAvailable = false;
-                    SetHint("Keycard acquired — find the card reader.");
-                }
-
-                // Potion interactions (use each flask as a different effect)
-                const float pickupRadius = 1f;
-
-                if (_models.FlaskModel1 != null && _flask1Available &&
-                    PlayerDistance(_models.FlaskModel1.Position) <= pickupRadius)
-                {
-                    ApplyInvertColors();
-                    _flask1Available = false;
-                }
-
-                if (_models.FlaskModel2 != null && _flask2Available &&
-                    PlayerDistance(_models.FlaskModel2.Position) <= pickupRadius)
-                {
-                    ApplyInvertControls();
-                    _flask2Available = false;
-                }
-
-                if (_models.FlaskModel3 != null && _flask3Available &&
-                    PlayerDistance(_models.FlaskModel3.Position) <= pickupRadius)
-                {
-                    ApplyCameraFlip();
-                    _flask3Available = false;
-                }
-
-                // Card reader interaction
-                if (_models.CardReaderModel != null &&
-                    PlayerDistance(_models.CardReaderModel.Position) <= _readerUseRadius)
-                {
-                    if (HasKeycard)
-                    {
-                        CardReaderUsed = true;
-                        _door.Interact(this);
-                        SetHint("Access granted — door opened.");
-                    }
-                    else
-                    {
-                        SetHint("Access denied — keycard required.");
-                    }
-                }
-
-                // Door interaction
-                if (_door.CanInteract(this))
-                {
-                    if (CardReaderUsed)
-                    {
-                        _door.Interact(this);
-                        SetHint("Door opened.");
-                    }
-                    else
-                    {
-                        SetHint("Door is locked — use the card reader first.");
-                    }
-                }
-            }
-
             // Animate the visual door model using SecurityDoor state
             float target = _door._open ? 1f : 0f;
             _doorAnim = MathHelper.Lerp(_doorAnim, target, (float)args.Time * _doorAnimSpeed);
@@ -389,7 +275,6 @@ namespace Assignment_4
                 _models.DoorModel.Rotation = new Vector3(-90f, -90f + rotationAngle, 0f);
             }
 
-            _exit.Update(this);
         }
 
         // ──────────────── RENDER LOOP ────────────────
@@ -403,10 +288,6 @@ namespace Assignment_4
 
             // Build view with optional upside-down roll
             Matrix4 view = _camera.GetViewMatrix();
-            if (_cameraFlipT > 0f)
-            {
-                view = view * Matrix4.CreateRotationX(MathHelper.Pi);
-            }
 
             _shader.SetMatrix4("view", view);
             _shader.SetMatrix4("projection", _camera.GetProjection(Size.X / (float)Size.Y));
@@ -433,21 +314,21 @@ namespace Assignment_4
             _meshFloor.Draw();
             // reset so untextured colored things aren’t accidentally textured
             _shader.SetInt("useTexture", 0);
-            _shader.SetInt("uInvertColors", (_invertColorsT > 0f) ? 1 : 0);
+            _shader.SetInt("uInvertColors", 0);
 
             // Static props & walls
             foreach (var p in _props) p.Draw(_shader);
             foreach (var w in _labWalls) w.Draw(_shader);
 
             // Opaque models via manager
-            _models.DrawOpaqueModels(_shader, _keycardAvailable);
+            _models.DrawOpaqueModels(_shader, true);
 
             // ===== TRANSPARENT PASS =====
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.DepthMask(false);
 
-            _models.DrawTransparentModels(_shader, _camera, _flask1Available, _flask2Available, _flask3Available);
+            _models.DrawTransparentModels(_shader, _camera, true, true, true);
 
             // restore defaults
             GL.DepthMask(true);
@@ -459,10 +340,6 @@ namespace Assignment_4
                 _collision.DrawCollisionDebug(_shader, _meshCube);
             }
 
-            // Exit marker (if any)
-            var exitModel = Matrix4.CreateScale(0.7f) * Matrix4.CreateTranslation(_exit.Position + new Vector3(0f, 0.35f, 0f));
-            _shader.SetMatrix4("model", exitModel);
-
             SwapBuffers();
         }
 
@@ -473,43 +350,9 @@ namespace Assignment_4
             _lightPos = new Vector3(0f, 2.3f, 0f);
             _lightEnabled = true;
             _spin = 0;
-            HasKeycard = false;
-            CardReaderUsed = false;
-            _eWasDownLab = _fWasDown = _cWasDown = _rWasDown = _bWasDown = false;
-            _keycardAvailable = true;
+            _doorAnim = 0f;
+            _fWasDown = _cWasDown = _rWasDown = _bWasDown = false;
             _showCollisionBoxes = false;
-
-            if (_models.KeycardModel != null)
-            {
-                _models.KeycardModel.Position = _keycardSpawn;
-                _models.KeycardModel.Rotation = new Vector3(0f, 280f, 0f);
-            }
-
-            // Potions become available again
-            _flask1Available = _flask2Available = _flask3Available = true;
-
-            // Put them back at their spawn transforms
-            if (_models.FlaskModel1 != null)
-            {
-                _models.FlaskModel1.Position = _flask1SpawnPos;
-                _models.FlaskModel1.Rotation = _flask1SpawnRot;
-                _models.FlaskModel1.Scale = _flask1SpawnScale;
-            }
-            if (_models.FlaskModel2 != null)
-            {
-                _models.FlaskModel2.Position = _flask2SpawnPos;
-                _models.FlaskModel2.Rotation = _flask2SpawnRot;
-                _models.FlaskModel2.Scale = _flask2SpawnScale;
-            }
-            if (_models.FlaskModel3 != null)
-            {
-                _models.FlaskModel3.Position = _flask3SpawnPos;
-                _models.FlaskModel3.Rotation = _flask3SpawnRot;
-                _models.FlaskModel3.Scale = _flask3SpawnScale;
-            }
-
-            // Clear effects (so reset starts clean)
-            _invertColorsT = _invertControlsT = _cameraFlipT = 0f;
 
             BuildLab();
             BuildScene();
@@ -522,7 +365,7 @@ namespace Assignment_4
                 stoolModel: _models.StoolModel
             );
 
-            SetHint("Objective: Find the keycard. (Press B to toggle collision debug)");
+            SetHint("Collisions only: explore the lab and avoid clipping through props.");
             CursorState = CursorState.Grabbed;
         }
 
@@ -540,7 +383,6 @@ namespace Assignment_4
             };
 
             _door = new SecurityDoor(_meshCube, _texDoor, new Vector3(5f, 1.1f, 0f));
-            _exit = new ExitTrigger(new Vector3(0f, 0f, 4.5f));
         }
 
         private void BuildScene()

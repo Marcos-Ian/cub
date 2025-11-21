@@ -12,10 +12,7 @@ namespace Assignment_4.Entities
 
         public void Update(Game game)
         {
-            if (game.CardReaderUsed && game.PlayerDistance(Position) < Radius)
-            {
-                game.SetHint("Level Complete! Press R to restart.");
-            }
+            // Interactions disabled; trigger kept as placeholder for future use.
         }
     }
 }
