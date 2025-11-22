@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 
-
-
 using Assignment_4.Rendering;
 namespace Assignment_4.Managers
 {
@@ -28,71 +26,57 @@ namespace Assignment_4.Managers
         /// Rebuilds OBBs for the scene models. Matches the original SetupModelCollisions logic.
         /// </summary>
         public void SetupModelCollisions(
-            Model officeDeskModel,
-            Model labBenchModel,
-            Model computerModel,
-            Model fridgeModel,
-            Model labChairModel,
-            Model stoolModel)
+            Model bedModel,
+            Model deskModel,
+            Model wardrobeModel,
+            Model sidetableModel
+           )
         {
             _modelObbColliders.Clear();
             Console.WriteLine("=== Setting up collisions (OBB) ===");
 
-            void Add(Model m, Vector3 visualSize)
+            // BED - simple box in the center of the bed
+            if (bedModel != null)
             {
-                if (m == null) return;
-                AddModelObbCollider(m, visualSize);
-                Console.WriteLine($"OBB at {m.Position} yaw={m.Rotation.Y} size={visualSize}");
-            }
-
-            // COMPOUND COLLIDERS (multiple boxes per model)
-
-            // Office desk - L-shaped desk with 1 main box (avoid negative Y)
-            if (officeDeskModel != null)
-            {
-                Console.WriteLine("Office Desk (compound - 1 box):");
-                AddCompoundModelCollider(officeDeskModel, new List<(Vector3, Vector3)>
+                Console.WriteLine("Bed (1 box):");
+                AddCompoundModelCollider(bedModel, new List<(Vector3, Vector3)>
                 {
-                    (new Vector3(0f, 0f, 0f), new Vector3(1.6f, 1.0f, 2.5f)),
+                    // Bed is scaled 0.0015, so visual sizes need to be large
+                    (new Vector3(0f, 0f, 0f), new Vector3(1400f, 600f, 2000f)),
                 });
             }
 
-            // Lab bench - large table with multiple sections
-            if (labBenchModel != null)
+            // DESK - computer desk (scale 21)
+            if (deskModel != null)
             {
-                Console.WriteLine("Lab Bench (compound - 3 boxes, refined fit):");
-                AddCompoundModelCollider(labBenchModel, new List<(Vector3, Vector3)>
+                Console.WriteLine("Computer Desk (1 box):");
+                AddCompoundModelCollider(deskModel, new List<(Vector3, Vector3)>
                 {
-                    // 1) Main straight counter (center segment)
-                    (new Vector3(1f, 0f, -1f),  new Vector3(5f,   1.0f, 2.4f)),
-                    // 2) Sink / right section (shorter, near faucet area)
-                    (new Vector3(2.6f, 0f, -1f),  new Vector3(2.4f, 1.0f, 2.4f)),
-                    // 3) Rounded end near microscope
-                    (new Vector3(-1.7f, 0f, 0.5f),new Vector3(1f,   1.0f, 5f)),
+                    (new Vector3(0f, 0f, 0f), new Vector3(0.06f, 0.02f, 0.08f)),
                 });
             }
 
-            // Computer desk
-            if (computerModel != null)
+            // WARDROBE - tall cabinet with depth
+            if (wardrobeModel != null)
             {
-                Console.WriteLine("Computer Desk (compound - 1 box):");
-                AddCompoundModelCollider(computerModel, new List<(Vector3, Vector3)>
+                Console.WriteLine("Wardrobe (1 box):");
+                AddCompoundModelCollider(wardrobeModel, new List<(Vector3, Vector3)>
                 {
-                    (new Vector3(0f, 0f, 0f), new Vector3(2f, 1.0f, 5f)),
+                    // Wardrobe is scaled 0.009, so collision needs to scale accordingly
+                    (new Vector3(60f, 1f, 9f), new Vector3(170f, 220f, 70f)),
                 });
             }
 
-            // SIMPLE SINGLE-BOX COLLIDERS
-            if (fridgeModel != null)
+            // SIDETABLE - small bedside table
+            if (sidetableModel != null)
             {
-                Console.WriteLine("Fridge (compound - 1 box with offset):");
-                AddCompoundModelCollider(fridgeModel, new List<(Vector3, Vector3)>
+                Console.WriteLine("Sidetable (1 box):");
+                AddCompoundModelCollider(sidetableModel, new List<(Vector3, Vector3)>
                 {
-                    (new Vector3(-50f, 0f, 50f), new Vector3(100f, 2.0f, 100f))
+                    // Sidetable is scaled 0.4
+                    (new Vector3(0f, 0f, 0f), new Vector3(2f, 1.5f, 2f)),
                 });
             }
-            Add(labChairModel, new Vector3(0.6f, 1.0f, 0.6f));
-            Add(stoolModel, new Vector3(0.4f, 1.0f, 0.4f));
 
             Console.WriteLine($"=== Total OBB colliders: {_modelObbColliders.Count} ===");
         }
@@ -103,6 +87,8 @@ namespace Assignment_4.Managers
         public void AddCompoundModelCollider(Model model, List<(Vector3 localOffset, Vector3 size)> colliderParts)
         {
             if (model == null) return;
+
+            Console.WriteLine($"  Adding collider to model at {model.Position} with scale {model.Scale}");
 
             float yawRad = MathHelper.DegreesToRadians(model.Rotation.Y);
             float cos = MathF.Cos(yawRad);
@@ -138,7 +124,7 @@ namespace Assignment_4.Managers
                 float maxY = MathF.Max(0.01f, worldSize.Y); // ensure positive height
 
                 _modelObbColliders.Add(new Obb2D(centerXZ, halfExtentsXZ, yawRad, minY, maxY));
-                Console.WriteLine($"  Sub-OBB at ({centerXZ.X:F2}, {centerXZ.Y:F2}) size=({worldSize.X:F2}, {worldSize.Z:F2})");
+                Console.WriteLine($"  ✓ OBB at XZ({centerXZ.X:F2}, {centerXZ.Y:F2}) size({worldSize.X:F2}×{worldSize.Z:F2}) Y({minY:F2}-{maxY:F2})");
             }
         }
 
@@ -252,7 +238,6 @@ namespace Assignment_4.Managers
 
         /// <summary>
         /// Draws wireframe boxes for OBBs. Caller should set view/projection and any other uniforms.
-        /// Logic unchanged from DrawCollisionDebug, minus the in-class toggles.
         /// </summary>
         public void DrawCollisionDebug(Shader shader, Mesh meshCube)
         {
@@ -268,13 +253,19 @@ namespace Assignment_4.Managers
             foreach (var obb in _modelObbColliders)
             {
                 // Create a box at the OBB position with correct rotation
+                // Height is based on Y span from the OBB (minY to maxY)
+                float height = obb.MaxY - obb.MinY;
+                float centerY = (obb.MinY + obb.MaxY) * 0.5f;
+
                 Matrix4 model =
-                    Matrix4.CreateScale(obb.HalfExtents.X * 2f, 1.5f, obb.HalfExtents.Y * 2f) *
+                    Matrix4.CreateScale(obb.HalfExtents.X * 2f, height, obb.HalfExtents.Y * 2f) *
                     Matrix4.CreateRotationY(obb.RotationRad) *
-                    Matrix4.CreateTranslation(obb.Center.X, 0.75f, obb.Center.Y);
+                    Matrix4.CreateTranslation(obb.Center.X, centerY, obb.Center.Y);
 
                 shader.SetMatrix4("model", model);
                 meshCube.Draw();
+
+                Console.WriteLine($"Debug OBB: center=({obb.Center.X:F2},{centerY:F2},{obb.Center.Y:F2}) size=({obb.HalfExtents.X * 2:F2},{height:F2},{obb.HalfExtents.Y * 2:F2})");
             }
 
             // Restore normal rendering

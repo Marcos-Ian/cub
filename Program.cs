@@ -14,7 +14,7 @@ namespace Assignment_4
 
             var nw = new NativeWindowSettings()
             {
-                Title = "Mini 3D Explorer (Midterm)",
+                Title = "Collision Tester",
                 Size = new Vector2i(1280, 720),
                 Flags = ContextFlags.ForwardCompatible
             };

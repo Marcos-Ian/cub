@@ -25,8 +25,8 @@ namespace Assignment_4
         private SecurityDoor _door;
 
         // ──────────────── MANAGERS ────────────────
-        private readonly CollisionManager _collision = new(); // your existing collision helper
-        private ModelManager _models;                         // NEW: centralized models owner
+        private readonly CollisionManager _collision = new(); // collision helper
+        private ModelManager _models;                         // centralized models owner (now only card reader + door)
 
         // ──────────────── SCENE RESOURCES ────────────────
         private Shader _shader;
@@ -52,8 +52,8 @@ namespace Assignment_4
         private bool _cWasDown = false;
         private bool _rWasDown = false;
         private bool _bWasDown = false;
-        private bool _showCollisionBoxes = false; // use this everywhere (replaces missing _debugCollisionBoxesEnabled)
-        private readonly Vector3 _doorClosedPos = new(5f, 0f, -1f);
+        private bool _showCollisionBoxes = false; // replaces old _debugCollisionBoxesEnabled
+        private readonly Vector3 _doorClosedPos = new(5f, 0.9f, -0.34f);
         private float _doorAnim = 0f;
         private const float _doorAnimSpeed = 3.0f;
 
@@ -102,10 +102,11 @@ namespace Assignment_4
             _texFloor = new Texture(Path.Combine(_assetsPath, "floor.jpg"));
             _texWall = new Texture(Path.Combine(_assetsPath, "wall.jpg"));
             _texPanel = new Texture(Path.Combine(_assetsPath, "panel.jpg"));
+            // _texDoor should be loaded similarly if you have a door texture file
 
-            // === Models via ModelManager ===
+            // === Models via ModelManager (now only Card Reader + Door) ===
             _models = new ModelManager(_assetsPath);
-            var keycardSpawn = new Vector3(2.4f, 0.89f, -1.4f);
+            var keycardSpawn = new Vector3(2.4f, 0.89f, -1.4f); // unused by ModelManager, kept for signature compatibility
             _models.LoadModels(keycardSpawn, _doorClosedPos);
             Console.WriteLine("=== Model Loading Complete ===");
             Console.WriteLine($"\n=== Total models loaded: {_models.GetLoadedModelsCount()} ===");
@@ -113,17 +114,15 @@ namespace Assignment_4
             BuildLab();
             BuildScene();
 
-            // Set up multi-OBB collisions using manager's references
             _collision.SetupModelCollisions(
-                officeDeskModel: _models.OfficeDeskModel,
-                labBenchModel: _models.LabBenchModel,
-                computerModel: _models.ComputerModel,
-                fridgeModel: _models.FridgeModel,
-                labChairModel: _models.LabChairModel,
-                stoolModel: _models.StoolModel
-            );
+    _models.BedModel,
+    _models.DeskModel,
+    _models.WardrobeModel,
+    _models.SideTableModel
+);
 
-            SetHint("Collisions only: explore the lab and avoid clipping through props.");
+
+            SetHint("Collisions only: explore the lab and avoid clipping through walls and the door.");
         }
 
         // ──────────────── UPDATE LOOP ────────────────
@@ -257,8 +256,11 @@ namespace Assignment_4
                     }
                 }
 
-                // OBB COLLISION: resolve against each model OBB using circle-vs-OBB
-                float playerRadius = 0.35f; // keep your current value
+                // Circle-vs-scene OBB collisions:
+                // NOTE: since all prop models were removed from ModelManager and
+                // not registered into CollisionManager anymore, this may now
+                // only handle whatever static OBBs you set up inside CollisionManager.
+                float playerRadius = 0.35f;
                 Vector2 camXZ = new Vector2(_camera.Position.X, _camera.Position.Z);
                 camXZ = _collision.ResolveCircleVsScene(camXZ, playerRadius);
                 _camera.Position = new Vector3(camXZ.X, _camera.Position.Y, camXZ.Y);
@@ -272,9 +274,8 @@ namespace Assignment_4
             {
                 float rotationAngle = _doorAnim * 90f;
                 _models.DoorModel.Position = _doorClosedPos;
-                _models.DoorModel.Rotation = new Vector3(-90f, -90f + rotationAngle, 0f);
+                _models.DoorModel.Rotation = new Vector3(0f, 90f + rotationAngle, 0f);
             }
-
         }
 
         // ──────────────── RENDER LOOP ────────────────
@@ -286,7 +287,7 @@ namespace Assignment_4
 
             _shader.Use();
 
-            // Build view with optional upside-down roll
+            // View / Projection
             Matrix4 view = _camera.GetViewMatrix();
 
             _shader.SetMatrix4("view", view);
@@ -298,7 +299,6 @@ namespace Assignment_4
             _shader.SetFloat("lightEnabled", _lightEnabled ? 1f : 0f);
             _shader.SetFloat("shininess", 32f);
 
-            // make sure depth test is on each frame
             GL.Enable(EnableCap.DepthTest);
             GL.DepthFunc(DepthFunction.Lequal);
 
@@ -306,13 +306,12 @@ namespace Assignment_4
             GL.Disable(EnableCap.Blend);
             GL.DepthMask(true);
 
-            // FLOOR (force texture ON just for the floor)
+            // FLOOR
             _shader.SetFloat("uOpacity", 1.0f);
             _shader.SetInt("useTexture", 1);
             _texFloor.Use();
             _shader.SetMatrix4("model", Matrix4.Identity);
             _meshFloor.Draw();
-            // reset so untextured colored things aren’t accidentally textured
             _shader.SetInt("useTexture", 0);
             _shader.SetInt("uInvertColors", 0);
 
@@ -320,7 +319,7 @@ namespace Assignment_4
             foreach (var p in _props) p.Draw(_shader);
             foreach (var w in _labWalls) w.Draw(_shader);
 
-            // Opaque models via manager
+            // Opaque models (now: only card reader + door)
             _models.DrawOpaqueModels(_shader, true);
 
             // ===== TRANSPARENT PASS =====
@@ -328,13 +327,13 @@ namespace Assignment_4
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.DepthMask(false);
 
+            // No flasks anymore, but we keep the call for API compatibility
             _models.DrawTransparentModels(_shader, _camera, true, true, true);
 
-            // restore defaults
             GL.DepthMask(true);
             GL.Disable(EnableCap.Blend);
 
-            // Draw collision debug boxes (use the correct flag)
+            // Collision debug boxes
             if (_showCollisionBoxes)
             {
                 _collision.DrawCollisionDebug(_shader, _meshCube);
@@ -356,16 +355,16 @@ namespace Assignment_4
 
             BuildLab();
             BuildScene();
-            _collision.SetupModelCollisions(
-                officeDeskModel: _models.OfficeDeskModel,
-                labBenchModel: _models.LabBenchModel,
-                computerModel: _models.ComputerModel,
-                fridgeModel: _models.FridgeModel,
-                labChairModel: _models.LabChairModel,
-                stoolModel: _models.StoolModel
-            );
 
-            SetHint("Collisions only: explore the lab and avoid clipping through props.");
+             _collision.SetupModelCollisions(
+    _models.BedModel,
+    _models.DeskModel,
+    _models.WardrobeModel,
+    _models.SideTableModel
+);
+
+
+            SetHint("Collisions only: explore the lab and avoid clipping through walls and the door.");
             CursorState = CursorState.Grabbed;
         }
 
@@ -394,10 +393,11 @@ namespace Assignment_4
 
             float ceilingHeight = 2.5f;
 
+            // Simple ceiling panel
             _props.Add(PropFactory.Create(mesh, texMetal, new Vector3(0f, ceilingHeight, 0f), new Vector3(10f, 0.1f, 10f)));
 
             float lightY = ceilingHeight - 0.12f;
-            _ = lightY; // currently unused, keep for future ceiling lights
+            _ = lightY; // currently unused, keep for possible future ceiling lights
         }
 
         protected override void OnUnload()
